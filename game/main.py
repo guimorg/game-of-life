@@ -1,51 +1,104 @@
-import numpy as np
-import matplotlib.pyplot as plt
+import pygame
 
-from game import Game
+from math import floor
 
-from matplotlib import animation
+"""
+    ~ ~ ~ GAME CONSTANTS ~ ~ ~
+    PYGAME use tuples to assign colot values (RGB)
+"""
+
+BORDER = (0, 0, 0)  # black
+BACKGROUND = (255, 255, 255)  # white
+
+"""
+    ~ ~ ~ SETUP ~ ~ ~
+    Setting Up Pygame
+"""
+
+pygame.init()
+width, height = 800, 800  # Maybe change this?
+size = (width, height)
+screen = pygame.display.set_mode(size)  # Setting up Screen Size
+pygame.display.set_caption("Conway's Life Game")
+font = pygame.font.SysFont("monospace", 20)
+
+"""
+    ~ ~ ~ FUNCTIONS ~ ~ ~
+"""
 
 
-if __name__ == "__main__":
-    game = Game()
+def draw(
+    grid_width: int,
+    grid_height: int,
+    tile_width: int,
+    tile_height: int
+):
+    """
+        Drawing grid.
 
-    # gen = np.array([
-    #     [0, 0, 0, 0, 0, 0, 0, 0],
-    #     [0, 0, 1, 1, 0, 0, 0, 0],
-    #     [0, 1, 1, 0, 0, 0, 0, 0],
-    #     [0, 0, 1, 0, 0, 0, 0, 0],
-    #     [0, 0, 0, 0, 0, 0, 0, 0],
-    #     [0, 0, 0, 0, 0, 0, 0, 0],
-    #     [0, 0, 0, 0, 0, 0, 0, 0],
-    #     [0, 0, 0, 0, 0, 0, 0, 0],
-    # ])
+        grid_width (int): Width Dimention
+        grid_height (int): Height Dimention
+        tile_width (int): Tile Width Dimention
+        tile_height (int): Tile Height Dimention
 
-    gen = np.round(np.random.random((50, 50)))
+    """
+    for i in range(0, grid_width):
+        for j in range(0, grid_width):
+            pygame.draw.rect(
+                screen,
+                BORDER,
+                (i * tile_width, j * tile_height, tile_width, tile_height),
+                1  # Border's Width
+            )
 
-    # Plotting Stuff
-    fig = plt.figure()
-    ax = plt.axes()
-    ax.set_axis_off()
-    fig.patch.set_facecolor('#d8dcd6')
-    im = plt.imshow(gen, cmap='binary')
+    label = font.render("This is the label!", 1, BORDER)
+    screen.blit(label, (20, height - 30))  # Hardcoded - Maybe change this?
 
-    def init():
-        im.set_data(np.zeros(shape=(10, 10)))
-        return im,
 
-    def animate(i):
-        global gen  # Hate to use global variables
-        gen = game.next_generation(gen)
-        im.set_array(gen)
-        return im,
+def clear_screen():
+    """
+        Clearing the screen with background colour.
+    """
+    screen.fill(BACKGROUND)
 
-    anim = animation.FuncAnimation(
-        fig,
-        animate,
-        init_func=init,
-        frames=1000,
-        interval=300,
-        blit=True
+
+"""
+    ~ ~ ~ VARIABLES ~ ~ ~
+"""
+
+done = False
+clock = pygame.time.Clock()
+
+
+"""
+    ~ ~ ~ VARIABLES ~ ~ ~
+"""
+
+while not done:
+
+    grid_width, grid_height = 50, 50
+    tile_width, tile_height = round(width / grid_width), round((height - 50) / grid_height)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            done = True
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos()
+            target_x = int(floor(pos[0] / tile_width))
+            target_y = int(floor(pos[1] / tile_height))
+            print(f'{target_x},{target_y}')
+
+    clear_screen()
+
+    draw(
+        grid_width,
+        grid_height,
+        tile_width,
+        tile_height
     )
 
-    anim.save('img/conway.gif', writer='imagemagick', fps=60)
+    pygame.display.flip()  # Update
+
+    clock.tick(30)
+
+pygame.quit()
